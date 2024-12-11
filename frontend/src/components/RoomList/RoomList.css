@@ -1,0 +1,12 @@
+.room-item {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.room-item:hover {
+    background-color: #f8f9fa;
+}
+
+.modal-container {
+    padding: 20px;
+}
