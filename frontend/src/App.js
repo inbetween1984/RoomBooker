@@ -3,12 +3,11 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import RoomList from "./components/RoomList/RoomList";
 import Header from "./components/Header/Header";
-import Register from "./components/Register/Register";
-import Login from "./components/Login/Login";
 import BookingList from "./components/BookingList/BookingList";
 import RoomDetail from "./components/RoomDetail/RoomDetail";
 import Auth from "./components/Auth/Auth";
 import PaymentSuccess from "./components/PaymentSuccess/PaymentSuccess";
+import YandexMap from "./components/YandexMap/YandexMap";
 
 function App() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -24,10 +23,10 @@ function App() {
                 <Routes>
                     <Route path="/" element={<RoomList searchTerm={searchTerm} />} />
                     <Route path="/:id" element={<RoomDetail />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Auth mode={'register'} />} />
+                    <Route path="/login" element={<Auth mode={'login'} />} />
                     <Route path="/bookings" element={<BookingList />} />
-                    <Route path="/test" element={<Auth />} />
+                    <Route path="/map" element={<YandexMap />} />
                     <Route path="/payment/success/" element={<PaymentSuccess />} />
                 </Routes>
             </Fragment>

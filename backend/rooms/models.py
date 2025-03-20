@@ -13,11 +13,14 @@ class Room(models.Model):
     capacity = models.IntegerField()
     equipment = models.ManyToManyField(Equipment)
     image = models.ImageField(upload_to='room_images/', blank=True, null=True)
-    address = models.CharField(max_length=100)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    address = models.CharField(max_length=255)
     price_per_day = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     def __str__(self):
         return self.name
+
 
 class Booking(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
@@ -33,8 +36,7 @@ class Booking(models.Model):
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews")
     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name="reviews")
-    booking = models.OneToOneField(Booking, on_delete=models.CASCADE, related_name="review")
-    rating = models.PositiveSmallIntegerField(choices=[(i, str(i)) for i in range(1, 6)])  # Оценка от 1 до 5
+    rating = models.PositiveSmallIntegerField(choices=[(i, str(i)) for i in range(1, 6)])
     comment = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

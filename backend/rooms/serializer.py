@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Room, Equipment, Booking
+from .models import Room, Equipment, Booking, Review
 
 
 class EquipmentSerializer(serializers.ModelSerializer):
@@ -21,9 +21,21 @@ class RoomSerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(obj.image.url)
         return None
 
+
+
+
 class BookingSerializer(serializers.ModelSerializer):
     room = RoomSerializer()
 
     class Meta:
         model = Booking
         fields = '__all__'
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(source='user.username', read_only=True)
+    room = serializers.CharField(source='room.name', read_only=True)
+
+    class Meta:
+        model = Review
+        fields = ['user', 'room', 'rating', 'comment', 'created_at']

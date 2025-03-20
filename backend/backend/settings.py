@@ -27,13 +27,11 @@ INSTALLED_APPS = [
     'corsheaders',
     'rooms',
     'payments',
-
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
 
 ALLOWED_HOSTS = [
-    '6969-188-233-12-225.ngrok-free.app',
     '127.0.0.1',
     'localhost'
 ]

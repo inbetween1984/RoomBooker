@@ -5,6 +5,7 @@ import { Container, Table, Button, Alert } from "react-bootstrap";
 
 const BookingList = () => {
     const [bookings, setBookings] = useState([]);
+    const [showPastBookings, setShowPastBookings] = useState(false);
     const [error, setError] = useState("");
     const navigate = useNavigate();
 
@@ -57,17 +58,24 @@ const BookingList = () => {
         }
     };
 
-    const isCancelable = (date) => {
+    const isActiveBooking  = (date) => {
         const today = new Date();
         const bookingEndDate = new Date(date);
         return bookingEndDate > today;
     };
 
+    const togglePastBookings = () => {
+        setShowPastBookings((prev) => !prev);
+    };
+
+    const currentBookings = bookings.filter((booking) => isActiveBooking(booking.date));
+    const pastBookings = bookings.filter((booking) => !isActiveBooking(booking.date));
+
     return (
         <Container className="mt-4">
             <h1 className="mb-4 text-primary">Your Bookings</h1>
             {error && <Alert variant="danger">{error}</Alert>}
-            {bookings.length === 0 && !error ? (
+            {currentBookings.length === 0 && !error ? (
                 <Alert variant="info">No bookings found.</Alert>
             ) : (
                 <Table bordered hover responsive>
@@ -81,14 +89,13 @@ const BookingList = () => {
                     </tr>
                     </thead>
                     <tbody>
-                    {bookings.map((booking, index) => (
+                    {currentBookings.map((booking, index) => (
                         <tr key={booking.id}>
                             <td>{index + 1}</td>
                             <td>{booking.room.name}</td>
                             <td>{booking.date}</td>
                             <td>{booking.approved ? "Yes" : "No"}</td>
                             <td>
-                                {isCancelable(booking.date) && (
                                 <Button
                                     variant="danger"
                                     size="sm"
@@ -96,12 +103,47 @@ const BookingList = () => {
                                 >
                                     Cancel
                                 </Button>
-                                )}
                             </td>
                         </tr>
                     ))}
                     </tbody>
                 </Table>
+            )}
+            <Button
+                variant="secondary"
+                className="mt-4 mb-3"
+                onClick={togglePastBookings}
+            >
+                {showPastBookings ? "Скрыть прошедшие бронирования" : "Показать прошедшие бронирования"}
+            </Button>
+            {showPastBookings && (
+                <>
+                    <h2 className="mt-4 mb-3 text-secondary">Past Bookings</h2>
+                    {pastBookings.length === 0 ? (
+                        <Alert variant="info">No past bookings found.</Alert>
+                    ) : (
+                        <Table bordered hover responsive>
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Room</th>
+                                <th>Date</th>
+                                <th>Approved</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {pastBookings.map((booking, index) => (
+                                <tr key={booking.id}>
+                                    <td>{index + 1}</td>
+                                    <td>{booking.room.name}</td>
+                                    <td>{booking.date}</td>
+                                    <td>{booking.approved ? "Yes" : "No"}</td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </Table>
+                    )}
+                </>
             )}
         </Container>
     );

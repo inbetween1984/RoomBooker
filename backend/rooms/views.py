@@ -12,8 +12,8 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.models import User
 
-from rooms.models import Room, Booking, Equipment
-from rooms.serializer import RoomSerializer, BookingSerializer, EquipmentSerializer
+from rooms.models import Room, Booking, Equipment, Review
+from rooms.serializer import RoomSerializer, BookingSerializer, EquipmentSerializer, ReviewSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -73,10 +73,13 @@ def room_list(request):
 
         if date_from or date_to:
             bookings = Booking.objects.filter(approved=True)
-            if date_from:
-                bookings = bookings.filter(date__lt=date_from)
-            if date_to:
-                bookings = bookings.filter(date__gt=date_to)
+            if date_from and date_to:
+                bookings = bookings.filter(date__range=(date_from, date_to))
+            elif date_from:
+                bookings = bookings.filter(date__gte=date_from)
+            elif date_to:
+                bookings = bookings.filter(date__lte=date_to)
+
             booked_room_ids = bookings.values_list('room_id', flat=True)
             rooms = rooms.exclude(id__in=booked_room_ids)
 
@@ -105,6 +108,44 @@ def room_detail(request, room_id):
         }, status=status.HTTP_200_OK)
     except Room.DoesNotExist:
         return Response({"error": "Room not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+def reviews_list(request, room_id):
+    reviews = Review.objects.filter(room_id=room_id).select_related('user')
+
+    if not reviews.exists():
+        return Response({"reviews": []}, status=status.HTTP_200_OK)
+
+    serializer = ReviewSerializer(reviews, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_review(request, room_id):
+    print(request.data)
+    try:
+        room = Room.objects.get(pk=room_id)
+    except Room.DoesNotExist:
+        return Response({"error": "Room not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if not Booking.objects.filter(
+        room=room, approved=True, date__lte=date.today(), user=request.user
+    ).exists():
+        return Response({"error": "You need book this room to create review"}, status=status.HTTP_404_NOT_FOUND)
+
+    if Review.objects.filter(room=room, user=request.user).exists():
+        return Response({"error": "You have already reviewed"}, status=status.HTTP_403_FORBIDDEN)
+
+    serializer = ReviewSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save(user=request.user, room=room)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    print("Serializer errors:", serializer.errors)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])

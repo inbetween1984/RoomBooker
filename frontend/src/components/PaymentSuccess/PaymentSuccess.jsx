@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { PAY_URL} from "../../index";
+import { Container } from "react-bootstrap";
+
 
 const PaymentSuccess = () => {
     const [message, setMessage] = useState("Processing your payment...");
@@ -36,10 +38,12 @@ const PaymentSuccess = () => {
     }, [searchParams]);
 
     return (
-        <div>
-            <h1>Payment Status</h1>
-            <p>{message}</p>
-        </div>
+        <Container className="d-flex justify-content-center align-items-center min-vh-100">
+            <div>
+                <h1>Payment Status</h1>
+                <p>{message}</p>
+            </div>
+        </Container>
     );
 };
 

@@ -22,6 +22,8 @@ urlpatterns = [
 
     path('api/cancel_book/<int:booking_id>/', rooms.views.cancel_booking, name='cancel_book'),
     path('api/rooms/<int:room_id>/', rooms.views.room_detail, name='room_detail'),
+    path('api/rooms/<int:room_id>/reviews', rooms.views.reviews_list, name='room_reviews'),
+    path('api/rooms/<int:room_id>/create_review/', rooms.views.create_review, name='create_review'),
 
     re_path(r'^api/equipments/$', rooms.views.equipment_list, name='equipment_list'),
 

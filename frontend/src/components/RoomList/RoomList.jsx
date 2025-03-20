@@ -1,25 +1,28 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import FilterRooms from '../FilterRooms/FilterRooms';
 import Modal from '../Modal/Modal';
 import { useGetRooms } from '../../hooks/useGetRooms';
 import { Button, Spinner, Alert, ListGroup, Container, Row, Col, Image } from 'react-bootstrap';
 import './RoomList.css';
+import YandexMap from "../YandexMap/YandexMap";
 
 const RoomList = ({ searchTerm }) => {
     const navigate = useNavigate();
     const { rooms, loading, error} = useGetRooms();
-    const [filteredRooms, setFilteredRooms] = useState([]);
     const [filterResults, setFilterResults] = useState(rooms);
     const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+    const [reset, setReset] = useState(false);
 
-    useEffect(() => {
+    const filteredRooms = useMemo(() => {
         if (filterResults.length > 0) {
-            const filteredItems = filterResults.filter((room) =>
-                room.name.toLowerCase().includes(searchTerm.toLowerCase())
+            return filterResults.filter((room) =>
+                room.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                room.address.toLowerCase().includes(searchTerm.toLowerCase())
+
             );
-            setFilteredRooms(filteredItems);
         }
+        return [];
     }, [filterResults, searchTerm]);
 
     useEffect(() => {
@@ -27,15 +30,23 @@ const RoomList = ({ searchTerm }) => {
     }, [rooms]);
 
     const handleFilterApply = (filteredData) => {
+        setReset(true);
         setFilterResults(filteredData);
         setIsFilterModalOpen(false);
     };
+
+    const handleFilterReset = () => {
+        setReset(false);
+        setFilterResults(rooms);
+    }
 
     return (
         <Container className="mt-5">
             <Row>
                 <Col>
                     <h1 className="text-center mb-4">Список залов</h1>
+                    {!loading && !error && <YandexMap rooms={filteredRooms} />}
+
                     {loading && (
                         <div className="text-center">
                             <Spinner animation="border" />
@@ -48,6 +59,15 @@ const RoomList = ({ searchTerm }) => {
                         <Button variant="primary" onClick={() => setIsFilterModalOpen(true)}>
                             Фильтровать
                         </Button>
+                        {reset && (
+                            <Button
+                                variant="secondary"
+                                onClick={handleFilterReset}
+                                className="ms-2"
+                            >
+                                Сброс
+                            </Button>
+                        )}
                     </div>
 
                     {isFilterModalOpen && (
